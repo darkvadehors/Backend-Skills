@@ -33,7 +33,59 @@ const add = ({uid, favoriteId}) => {
     })
 }
 
+const getAll = (uid: number) => {
+    return new Promise((resolve, reject) => {
+        sql = `SELECT 
+                u.name AS favorite_name,
+                u.firstname AS favorite_firstname,
+                fu.id AS favorite_id
+            FROM favorite_users fu
+            LEFT JOIN users u 
+                ON fu.favoriteId = u.id
+            WHERE fu.uid = ?`
+
+        const database = mysqlConnection()
+
+        try {
+            database.query(sql, [uid], (err: MysqlError, res) => {
+                if(err) reject(err)
+
+                database.end(err => reject(err))
+
+                console.log(res);
+
+                resolve(res)
+            })
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+const remove = ({ id, uid }) => {
+    return new Promise((resolve, reject) => {
+        sql = `DELETE FROM favorite_users WHERE id= ? AND uid= ?`
+
+        const database = mysqlConnection()
+
+        try {
+            database.query(sql, [id, uid], (err: MysqlError, res) => {
+                if(err) reject(err)
+
+                database.end(err => reject(err))
+
+                console.log(res);
+
+                resolve(res)
+            })
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 
 export default {
-    add
+    add, 
+    getAll, 
+    remove
 }

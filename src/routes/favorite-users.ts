@@ -32,10 +32,57 @@ const add = (req: Request, res: Response) => {
     })
 }
 
+const getAll = (req: Request, res: Response) => {
+    logging.info(NAMESPACE, 'Get All Favorite User')
+
+    if (req.headers.authorization === undefined) {
+        logging.error(NAMESPACE, 'Header Authorization Missing')
+        return res.status(404).json({message: 'Header Authorization Missing'})
+    }
+
+    jwt.tokenIsValid(req.headers.authorization).then(result => {
+        const uid: number = parseInt(req.params.id)
+
+        repo.getAll(uid).then(result => {
+            res.status(200).json(result)
+        }).catch(error => {
+            logging.error(NAMESPACE, error)
+            res.status(404).json({message: error})
+        })
+    }).catch(error => {
+        logging.error(NAMESPACE, error)
+        return res.status(404).json({message: error})
+    })
+}
+
+const remove = (req: Request, res: Response) => {
+    logging.info(NAMESPACE, 'Remove Favorite User')
+
+    if (req.headers.authorization === undefined) {
+        logging.error(NAMESPACE, 'Header Authorization Missing')
+        return res.status(404).json({message: 'Header Authorization Missing'})
+    }
+
+    jwt.tokenIsValid(req.headers.authorization).then(result => {
+        const {id, uid} = req.body
+
+        repo.remove({id, uid}).then(result => {
+            res.status(200).json(result)
+        }).catch(error => {
+            logging.error(NAMESPACE, error)
+            res.status(404).json({message: error})
+        })
+
+    }).catch(error => {
+        logging.error(NAMESPACE, error)
+        return res.status(404).json({message: error})
+    })
+}
 
 // ROUTES
 favUsers.post('/', add)
-
+favUsers.get('/:id', getAll)
+favUsers.delete('/', remove)
 
 // EXPORT ROUTER
 export default favUsers
